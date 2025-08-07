@@ -43,7 +43,7 @@ export default function Register() {
         toast.success('Registration successful!')
         setTimeout(() => {
           navigate('/')
-        }, 2000)
+        }, 1000)
       }
     } catch (err: any) {
       const message = err.response?.data

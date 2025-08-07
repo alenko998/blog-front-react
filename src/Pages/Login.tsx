@@ -3,6 +3,8 @@ import { Link, useNavigate } from 'react-router-dom'
 import axios from 'axios'
 import Button from '../Components/Button'
 import toast from 'react-hot-toast'
+import { jwtDecode } from 'jwt-decode'
+import Cookies from 'js-cookie'
 
 export default function Login() {
   const [username, setUsername] = useState('')
@@ -21,16 +23,21 @@ export default function Login() {
       })
 
       if (response.status === 200) {
+        const token = response.data.token
+
+        Cookies.set('token', token, { expires: 7 })
+
+        const decoded: any = jwtDecode(token)
+        const role = decoded['http://schemas.microsoft.com/ws/2008/06/identity/claims/role']
+        console.log('User role:', role)
+
         toast.success('Login successful!')
         setUsername('')
         setPassword('')
 
-        // Sačuvaj token ako koristiš JWT
-        // localStorage.setItem('token', response.data.token)
-
         setTimeout(() => {
           navigate('/')
-        }, 2000)
+        }, 1000)
       }
     } catch (err: any) {
       const message = err.response?.data
@@ -72,9 +79,8 @@ export default function Login() {
         <Button type="submit" className="w-full">
           Login
         </Button>
-
         <p className="mt-4 text-sm text-center">
-          Don&apos;t have an account?{' '}
+          Don't have an account?{' '}
           <Link to="/register" className="text-pink-600 hover:underline">
             Register here
           </Link>
