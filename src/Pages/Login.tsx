@@ -1,21 +1,58 @@
 import { useState } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
+import axios from 'axios'
 import Button from '../Components/Button'
-
+import toast from 'react-hot-toast'
 
 export default function Login() {
   const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
+  const [error, setError] = useState('')
+  const navigate = useNavigate()
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    console.log({ username, password })
+    setError('')
+
+    try {
+      const response = await axios.post('http://localhost:5168/api/Writer/login', {
+        username,
+        password,
+      })
+
+      if (response.status === 200) {
+        toast.success('Login successful!')
+        setUsername('')
+        setPassword('')
+
+        // Sačuvaj token ako koristiš JWT
+        // localStorage.setItem('token', response.data.token)
+
+        setTimeout(() => {
+          navigate('/')
+        }, 2000)
+      }
+    } catch (err: any) {
+      const message = err.response?.data
+
+      if (typeof message === 'string') {
+        setError(message)
+      } else {
+        setError('Login failed. Please try again.')
+      }
+    }
   }
 
   return (
     <div className="flex justify-center items-center mt-10">
-      <form onSubmit={handleSubmit} className="bg-white p-8 rounded-lg shadow-lg w-full max-w-md">
+      <form
+        onSubmit={handleSubmit}
+        className="bg-white p-8 rounded-lg shadow-lg w-full max-w-md"
+      >
         <h2 className="text-2xl font-bold mb-6 text-pink-600 text-center">Login</h2>
+
+        {error && <p className="text-red-600 mb-4 text-sm text-center">{error}</p>}
+
         <input
           type="text"
           placeholder="Username"
@@ -35,8 +72,9 @@ export default function Login() {
         <Button type="submit" className="w-full">
           Login
         </Button>
+
         <p className="mt-4 text-sm text-center">
-          Don't have an account?{' '}
+          Don&apos;t have an account?{' '}
           <Link to="/register" className="text-pink-600 hover:underline">
             Register here
           </Link>
